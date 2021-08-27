@@ -37,43 +37,30 @@ vector<string> extract(string value){
     return expression;
 }
 
+int get_coordinate(string coordinate, vector <string>& array){
+    for (int j = 0; j < array.size(); j++){
+        if(coordinate==array[j]){
+            return j;
+        }
+    }
+    return -1;
+}
 string find(vector <string>& expression, vector <string>& header, vector <string>& numbers, vector <vector <string>>& cells){
     int result = 0;
-    int coord1x = 0;
-    int coord1y = 0;
-    int coord2x = 0;
-    int coord2y = 0;
-    for (int j = 0; j < header.size(); j++){
-        if(expression[0]==header[j]){
-            coord1y = j;
-        }
-    }
-    for (int j = 0; j < numbers.size(); j++){
+    int coord1x = get_coordinate(expression[0], header);
+    int coord1y = get_coordinate(expression[1], numbers);
+    int coord2x = get_coordinate(expression[3], header);
+    int coord2y = get_coordinate(expression[4], numbers);
 
-        if(expression[1]==numbers[j]){
-            coord1x = j;
-
-        }
-    }
-    for (int j = 0; j < header.size(); j++){
-        if(expression[3]==header[j]){
-            coord2y = j;
-        }
-    }
-    for (int j = 0; j < numbers.size(); j++){
-        if(expression[4]==numbers[j]){
-            coord2x = j;
-        }
-    }
     int res1, res2;
     try {
-        res1 = stoi(cells[coord1x][coord1y]);
+        res1 = stoi(cells[coord1y][coord1x]);
     }
     catch(std::invalid_argument e) {
         cout << "Invalid Argument In Cell"<< coord1x << coord1y;
     }
     try {
-        res2 = stoi(cells[coord2x][coord2y]);
+        res2 = stoi(cells[coord2y][coord2x]);
     }
     catch(std::invalid_argument e) {
         cout << "Invalid Argument In Cell"<< coord2x << coord2y;
