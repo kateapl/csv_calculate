@@ -111,6 +111,10 @@ int main(int argc, char* argv[])
     if (!work_file.is_open()){
         cout << "file not found";
     }
+    if (work_file.peek() == EOF){
+        cout << endl;
+        return 0;
+    }
     string line;
     string value;
     char delimiter = ',';
@@ -119,7 +123,6 @@ int main(int argc, char* argv[])
     vector < vector <string> > cells;
 
     while (getline(work_file, line)){ //заполняем массив ячеек и массив номеров строк
-    //    cout << line;}
         int j = 0;
         vector <string> row;
         istringstream s(line);
@@ -145,11 +148,12 @@ int main(int argc, char* argv[])
 
     cout << ",";
     for (int j = 0; j < header.size(); j++){
-        cout <<  header[j] << ",";
+        if(j == 0) cout <<  header[j];
+        else cout << "," <<  header[j];
     }
     cout << endl;//вывели заголовок
-
     for (int i = 0; i < cells.size(); i++){
+
         cout << numbers[i] << ",";
         for (int j = 0; j < cells[i].size(); j++){
             cout << cells[i][j];
