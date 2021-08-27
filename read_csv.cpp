@@ -38,28 +38,31 @@ vector<string> extract(string value){
 }
 
 string find(vector <string>& expression, vector <string>& header, vector <string>& numbers, vector <vector <string>>& cells){
-    int coord1x;
-    int coord1y;
-    int coord2x;
-    int coord2y;
-    for (int j = 0; j < numbers.size(); j++){
-        if(expression[0]==numbers[j]){
-            coord1x = j;
-        }
-    }
+    int result = 0;
+    int coord1x = 0;
+    int coord1y = 0;
+    int coord2x = 0;
+    int coord2y = 0;
     for (int j = 0; j < header.size(); j++){
-        if(expression[1]==header[j]){
+        if(expression[0]==header[j]){
             coord1y = j;
         }
     }
     for (int j = 0; j < numbers.size(); j++){
-        if(expression[3]==numbers[j]){
-            coord2x = j;
+
+        if(expression[1]==numbers[j]){
+            coord1x = j;
+
         }
     }
     for (int j = 0; j < header.size(); j++){
-        if(expression[4]==header[j]){
+        if(expression[3]==header[j]){
             coord2y = j;
+        }
+    }
+    for (int j = 0; j < numbers.size(); j++){
+        if(expression[4]==numbers[j]){
+            coord2x = j;
         }
     }
     int res1, res2;
@@ -75,7 +78,7 @@ string find(vector <string>& expression, vector <string>& header, vector <string
     catch(std::invalid_argument e) {
         cout << "Invalid Argument In Cell"<< coord2x << coord2y;
     }
-    int result;
+
     string plus = "+";
     string minus = "-";
     string division = "/";
@@ -103,8 +106,7 @@ int calculate(vector <string>& header, vector <string>& numbers, vector <vector 
             value = cells[i][j];
             if (value[0] == '='){
                 expression = extract(value);//получаем выражением
-
-//                cells[i][j] = find(expression, header, numbers, cells);//записываем результат выражения в ячейку
+                cells[i][j] = find(expression, header, numbers, cells);//записываем результат выражения в ячейку
             }
         }
    }
@@ -154,22 +156,22 @@ int main(int argc, char* argv[])
 
     calculate(header, numbers, cells);//рассчитываем значения для ячеек
 
-//    cout << ",";
-//    for (int j = 0; j < header.size(); j++){
-//        cout <<  header[j] << ",";
-//    }
-//    cout << endl;//вывели заголовок
-//
-//    for (int i = 0; i < cells.size(); i++){
-//        cout << numbers[i] << ",";
-//        for (int j = 0; j < cells[i].size(); j++){
-//            cout << cells[i][j];
-//            if(j!=cells[i].size()-1){
-//                cout << ",";
-//            }
-//        }
-//        cout << endl;
-//    }
+    cout << ",";
+    for (int j = 0; j < header.size(); j++){
+        cout <<  header[j] << ",";
+    }
+    cout << endl;//вывели заголовок
+
+    for (int i = 0; i < cells.size(); i++){
+        cout << numbers[i] << ",";
+        for (int j = 0; j < cells[i].size(); j++){
+            cout << cells[i][j];
+            if(j!=cells[i].size()-1){
+                cout << ",";
+            }
+        }
+        cout << endl;
+    }
 work_file.close();
 return 0;
 }
