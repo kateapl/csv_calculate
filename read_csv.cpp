@@ -15,7 +15,7 @@ vector<string> extract(string value){
     string division = "/";
     string mul = "*";
     vector<string> expression;
-    for (int i = 0; value.length(); i++){
+    for (int i = 0; i < value.length(); i++){
         if(isalpha(value[i])){
             word += value[i];
         }
@@ -23,7 +23,8 @@ vector<string> extract(string value){
             number += value[i];
         }
         if(value[i] == '+' || value[i] == '-' || value[i] == '/' || value[i] == '*'){
-            string sign(&value[i]);
+            char s[] = {value[i], '\0'};
+            string sign(s);
             expression.push_back(word);
             expression.push_back(number);
             expression.push_back(sign);
@@ -102,10 +103,11 @@ int calculate(vector <string>& header, vector <string>& numbers, vector <vector 
             value = cells[i][j];
             if (value[0] == '='){
                 expression = extract(value);//получаем выражением
-                cells[i][j] = find(expression, header, numbers, cells);//записываем результат выражения в ячейку
+
+//                cells[i][j] = find(expression, header, numbers, cells);//записываем результат выражения в ячейку
             }
         }
-    }
+   }
 }
 
 
@@ -134,10 +136,6 @@ int main(int argc, char* argv[])
         istringstream s(line);
         string value;
         while (getline(s, value,delimiter)){
-        //while (line.size() > 0){
-           // int pos = line.find(delimiter);
-            //value = line.substr(0, pos);
-            //cout << value;
             if (j == 0){
                 j++;
                 if (value==""){}//если элемен пустой, то ничего
@@ -147,7 +145,6 @@ int main(int argc, char* argv[])
             }else{
                 row.push_back(value);//строка без первого элемента
             }
-            //line.erase(0, pos);
         }
         cells.push_back(row);//добавляем в основной массив клеток
     }
@@ -155,21 +152,24 @@ int main(int argc, char* argv[])
     auto iter = cells.cbegin(); // указатель на первый элемент
     cells.erase(iter);   // удаляем элемент
 
-    //calculate(header, numbers, cells);//рассчитываем значения для ячеек
+    calculate(header, numbers, cells);//рассчитываем значения для ячеек
 
-    cout << ",";
-    for (int j = 0; j < header.size(); j++){
-        cout <<  header[j] << ",";
-    }
-    cout << endl;//вывели заголовок
-
-    for (int i = 0; i < cells.size(); i++){
-        cout << numbers[i] << ",";
-        for (int j = 0; j < cells[i].size(); j++){
-            cout << cells[i][j] << ",";
-        }
-        cout << endl;
-    }
+//    cout << ",";
+//    for (int j = 0; j < header.size(); j++){
+//        cout <<  header[j] << ",";
+//    }
+//    cout << endl;//вывели заголовок
+//
+//    for (int i = 0; i < cells.size(); i++){
+//        cout << numbers[i] << ",";
+//        for (int j = 0; j < cells[i].size(); j++){
+//            cout << cells[i][j];
+//            if(j!=cells[i].size()-1){
+//                cout << ",";
+//            }
+//        }
+//        cout << endl;
+//    }
 work_file.close();
 return 0;
 }
