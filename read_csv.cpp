@@ -74,21 +74,27 @@ int get_coordinate(string coordinate, vector <string>& array){//находим �
     return -1;
 }
 
+int get_number(string expression, vector <string>& header, vector <string>& numbers, vector <vector <string>>& cells){
+    vector<string> coord1 = parse_coordinate(expression);//разбираем координату на 2 составляющих
+    int res = 0;
+    int coord1x = get_coordinate(coord1[0], header);
+    int coord1y = get_coordinate(coord1[1], numbers);//получили первые координаты
+
+    try {
+        res = stoi(cells[coord1y][coord1x]);
+    }
+    catch(invalid_argument e) {
+        cout << "Invalid Argument In Cell"<< coord1x << coord1y;
+    }
+return res;
+}
+
 string extract(string value, vector <string>& header, vector <string>& numbers, vector <vector <string>>& cells){
     vector<string> expression = parser(value);//получаем 2 аргумента и знак
     int res1 = 0, res2 = 0;
 
     if (isalpha(expression[0][0])){//если первый аргумент содержит букву
-        vector<string> coord1 = parse_coordinate(expression[0]);//разбираем координату на 2 составляющих
-        int coord1x = get_coordinate(coord1[0], header);
-        int coord1y = get_coordinate(coord1[1], numbers);//получили первые координаты
-
-        try {
-            res1 = stoi(cells[coord1y][coord1x]);
-        }
-        catch(invalid_argument e) {
-            cout << "Invalid Argument In Cell"<< coord1x << coord1y;
-        }
+        res1 = get_number(expression[0], header, numbers, cells);
     }else{
         try {
             res1 = stoi(expression[0]);//если буквы в аргументе нет, то это просто число
@@ -99,15 +105,7 @@ string extract(string value, vector <string>& header, vector <string>& numbers, 
     }
 
     if (isalpha(expression[2][0])){//если второй аргумент содержит букву
-        vector<string> coord2 = parse_coordinate(expression[2]);//разбираем координату на 2 составляющих
-        int coord2x = get_coordinate(coord2[0], header);
-        int coord2y = get_coordinate(coord2[1], numbers);//получили первые координаты
-        try {
-            res2 = stoi(cells[coord2y][coord2x]);//получаем значение по координатам
-        }
-        catch(invalid_argument e) {
-            cout << "Invalid Argument In Cell"<< coord2x << coord2y;
-        }
+        res2 = get_number(expression[2], header, numbers, cells);
     }else{
         try {
             res2 = stoi(expression[2]);//если буквы в аргументе нет, то это просто число
@@ -146,7 +144,6 @@ int calculate(vector <string>& header, vector <string>& numbers, vector <vector 
             value = cells[i][j];
             if (value[0] == '='){
                 value.erase(0,1); // удаляет из строки знак равенства
-
                 cells[i][j] = extract(value, header, numbers, cells);//записываем результат выражения
             }
         }
