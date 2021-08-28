@@ -66,6 +66,7 @@ vector<string> parse_coordinate(string value){//находим слово и ч�
 }
 
 int get_coordinate(string coordinate, vector <string>& array){//находим индекс координаты
+
     for (int j = 0; j < array.size(); j++){
         if(coordinate==array[j]){
             return j;
@@ -75,16 +76,18 @@ int get_coordinate(string coordinate, vector <string>& array){//находим �
 }
 
 int get_number(string expression, vector <string>& header, vector <string>& numbers, vector <vector <string>>& cells){
-    vector<string> coord1 = parse_coordinate(expression);//разбираем координату на 2 составляющих
+    vector<string> coord = parse_coordinate(expression);//разбираем координату на 2 составляющих
     int res = 0;
-    int coord1x = get_coordinate(coord1[0], header);
-    int coord1y = get_coordinate(coord1[1], numbers);//получили первые координаты
-
+    int coordy = get_coordinate(coord[0], header);
+    int coordx = get_coordinate(coord[1], numbers);//получили первые координаты
+    if(coordx == -1 || coordy == -1){
+        throw "Wrong coordinates";
+    }
     try {
-        res = stoi(cells[coord1y][coord1x]);
+        res = stoi(cells[coordx][coordy]);
     }
     catch(invalid_argument e) {
-        cout << "Invalid Argument In Cell"<< coord1x << coord1y;
+        throw "Invalid Argument In Cell";
     }
 return res;
 }
@@ -94,26 +97,40 @@ string extract(string value, vector <string>& header, vector <string>& numbers, 
     int res1 = 0, res2 = 0;
 
     if (isalpha(expression[0][0])){//если первый аргумент содержит букву
-        res1 = get_number(expression[0], header, numbers, cells);
+        try {
+            res1 = get_number(expression[0], header, numbers, cells);
+        }
+        catch(char const* str)//сюда передастся строка
+        {
+            return (str);
+        }
+
     }else{
         try {
             res1 = stoi(expression[0]);//если буквы в аргументе нет, то это просто число
         }
         catch(invalid_argument e) {
-            cout << "Invalid Argument In "<< expression[0];
+            return ("Invalid Argument");
         }
     }
 
     if (isalpha(expression[2][0])){//если второй аргумент содержит букву
-        res2 = get_number(expression[2], header, numbers, cells);
+        try {
+            res2 = get_number(expression[2], header, numbers, cells);
+        }
+        catch(char const* str)//сюда передастся строка
+            {
+            return (str);
+            }
     }else{
         try {
             res2 = stoi(expression[2]);//если буквы в аргументе нет, то это просто число
         }
         catch(invalid_argument e) {
-            cout << "Invalid Argument In "<< expression[2];
+            return ("Invalid Argument");
         }
     }
+
     string plus = "+";
     string minus = "-";
     string division = "/";
@@ -126,7 +143,7 @@ string extract(string value, vector <string>& header, vector <string>& numbers, 
         result = res1 - res2;
     }
     else if(expression[1] == division){
-        if (res2 == 0) result = 0;
+        if (res2 == 0) return("Zero Division");
         else result = int(res1/res2);
     }
     else if(expression[1] == mul){
@@ -151,8 +168,7 @@ int calculate(vector <string>& header, vector <string>& numbers, vector <vector 
 }
 
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]){
     if(argc != 2){
         cout << "usage: " << argv[0] << " path_to_csv_file\n";
         return 0;
@@ -172,7 +188,7 @@ int main(int argc, char* argv[])
     vector <string> header;
     vector <string> numbers;
     vector < vector <string> > cells;
-
+    int i =0;
     while (getline(work_file, line)){ //заполняем массив ячеек и массив номеров строк
         int j = 0;
         vector <string> row;
@@ -181,14 +197,25 @@ int main(int argc, char* argv[])
         while (getline(s, value,delimiter)){
             if (j == 0){
                 j++;
-                if (value==""){}//если элемен пустой, то ничего
+                if (value=="" && i == 0){
+                    if (i == 0){}//если элемен пустой, то ничего
+                    else{
+                        cout << "Blank cell [" << i << "]["<< j << "]" << endl;
+                        return 0;
+                    }
+                }
                 else{//иначе добавить к массиву номеров строк
                     numbers.push_back(value);//добавляем к массиву номеров строк
                 }
             }else{
+                if (value==""){
+                    cout << "Blank cell [" << i << "]["<< j << "]" << endl;
+                    return 0;
+                }
                 row.push_back(value);//строка без первого элемента
             }
         }
+        i++;
         cells.push_back(row);//добавляем в основной массив клеток
     }
     header = cells[0]; //получаем массив заголовка
