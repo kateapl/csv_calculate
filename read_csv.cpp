@@ -6,15 +6,50 @@
 #include <string>
 using namespace std;
 
-vector<string> extract(string value){
-    value.erase(0,1); // удаляет из строки знак равенства
-    string word = "";
-    string number = "";
+vector<string> parser(string value){//получаем оба аргумента и знак
+    string arg1 = "";
+    string arg2 = "";
+    string sign = "";
     string plus = "+";
     string minus = "-";
     string division = "/";
     string mul = "*";
     vector<string> expression;
+    int pos;
+    if(value.find('+') != -1){
+        pos = value.find('+');
+        sign = "+";
+    }
+    if(value.find('-')!= -1){
+        pos = value.find('-');
+        sign = "-";
+    }
+    if(value.find('*')!= -1){
+        pos = value.find('*');
+        sign = "*";
+    }
+    if(value.find('/')!= -1){
+        pos = value.find('/');
+        sign = "/";
+    }
+
+    for (int i = 0; i < pos; i++){//получаем первый аргумент
+        arg1 += value[i];
+    }
+    for (int i = pos+1; i < value.size(); i++){//получаем второй аргумент
+        arg2 += value[i];
+    }
+
+    expression.push_back(arg1);
+    expression.push_back(sign);
+    expression.push_back(arg2);
+
+    return expression;
+}
+
+vector<string> parse_coordinate(string value){//находим слово и число координаты
+    string word = "";
+    string number = "";
     for (int i = 0; i < value.length(); i++){
         if(isalpha(value[i])){
             word += value[i];
@@ -22,22 +57,15 @@ vector<string> extract(string value){
         if (isdigit(value[i]) ) {
             number += value[i];
         }
-        if(value[i] == '+' || value[i] == '-' || value[i] == '/' || value[i] == '*'){
-            char s[] = {value[i], '\0'};
-            string sign(s);
-            expression.push_back(word);
-            expression.push_back(number);
-            expression.push_back(sign);
-            word = "";
-            number = "";
-        }
+
     }
+    vector<string> expression;
     expression.push_back(word);
     expression.push_back(number);
     return expression;
 }
 
-int get_coordinate(string coordinate, vector <string>& array){
+int get_coordinate(string coordinate, vector <string>& array){//находим индекс координаты
     for (int j = 0; j < array.size(); j++){
         if(coordinate==array[j]){
             return j;
@@ -45,43 +73,68 @@ int get_coordinate(string coordinate, vector <string>& array){
     }
     return -1;
 }
-string find(vector <string>& expression, vector <string>& header, vector <string>& numbers, vector <vector <string>>& cells){
-    int result = 0;
-    int coord1x = get_coordinate(expression[0], header);
-    int coord1y = get_coordinate(expression[1], numbers);
-    int coord2x = get_coordinate(expression[3], header);
-    int coord2y = get_coordinate(expression[4], numbers);
 
-    int res1, res2;
-    try {
-        res1 = stoi(cells[coord1y][coord1x]);
-    }
-    catch(std::invalid_argument e) {
-        cout << "Invalid Argument In Cell"<< coord1x << coord1y;
-    }
-    try {
-        res2 = stoi(cells[coord2y][coord2x]);
-    }
-    catch(std::invalid_argument e) {
-        cout << "Invalid Argument In Cell"<< coord2x << coord2y;
+string extract(string value, vector <string>& header, vector <string>& numbers, vector <vector <string>>& cells){
+    vector<string> expression = parser(value);//получаем 2 аргумента и знак
+    int res1 = 0, res2 = 0;
+
+    if (isalpha(expression[0][0])){//если первый аргумент содержит букву
+        vector<string> coord1 = parse_coordinate(expression[0]);//разбираем координату на 2 составляющих
+        int coord1x = get_coordinate(coord1[0], header);
+        int coord1y = get_coordinate(coord1[1], numbers);//получили первые координаты
+
+        try {
+            res1 = stoi(cells[coord1y][coord1x]);
+        }
+        catch(invalid_argument e) {
+            cout << "Invalid Argument In Cell"<< coord1x << coord1y;
+        }
+    }else{
+        try {
+            res1 = stoi(expression[0]);//если буквы в аргументе нет, то это просто число
+        }
+        catch(invalid_argument e) {
+            cout << "Invalid Argument In "<< expression[0];
+        }
     }
 
+    if (isalpha(expression[2][0])){//если второй аргумент содержит букву
+        vector<string> coord2 = parse_coordinate(expression[2]);//разбираем координату на 2 составляющих
+        int coord2x = get_coordinate(coord2[0], header);
+        int coord2y = get_coordinate(coord2[1], numbers);//получили первые координаты
+        try {
+            res2 = stoi(cells[coord2y][coord2x]);//получаем значение по координатам
+        }
+        catch(invalid_argument e) {
+            cout << "Invalid Argument In Cell"<< coord2x << coord2y;
+        }
+    }else{
+        try {
+            res2 = stoi(expression[2]);//если буквы в аргументе нет, то это просто число
+        }
+        catch(invalid_argument e) {
+            cout << "Invalid Argument In "<< expression[2];
+        }
+    }
     string plus = "+";
     string minus = "-";
     string division = "/";
     string mul = "*";
-    if(expression[2] == plus){
+    int result = 0;
+    if(expression[1] == plus){
         result = res1 + res2;
     }
-    else if(expression[2] == minus){
+    else if(expression[1] == minus){
         result = res1 - res2;
     }
-    else if(expression[2] == division){
-        result = int(res1/res2);
+    else if(expression[1] == division){
+        if (res2 == 0) result = 0;
+        else result = int(res1/res2);
     }
-    else if(expression[2] == mul){
+    else if(expression[1] == mul){
         result = res1 * res2;
     }
+
     return to_string(result);
 }
 
@@ -92,8 +145,9 @@ int calculate(vector <string>& header, vector <string>& numbers, vector <vector 
         for (int j = 0; j < cells[i].size(); j++){
             value = cells[i][j];
             if (value[0] == '='){
-                expression = extract(value);//получаем выражением
-                cells[i][j] = find(expression, header, numbers, cells);//записываем результат выражения в ячейку
+                value.erase(0,1); // удаляет из строки знак равенства
+
+                cells[i][j] = extract(value, header, numbers, cells);//записываем результат выражения
             }
         }
    }
